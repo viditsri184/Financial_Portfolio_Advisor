@@ -1,0 +1,35 @@
+/* Basic styling for the Financial Advisor Streamlit UI */
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+    font-weight: 600;
+}
+
+.stButton>button {
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    border: none;
+}
+
+.stButton>button:hover {
+    background-color: #0b5ed7;
+}
+
+.chat-message {
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+.chat-user {
+    background-color: #e3f2fd;
+}
+
+.chat-assistant {
+    background-color: #f8f9fa;
+}
