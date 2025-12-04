@@ -25,6 +25,13 @@ class AdvisoryAgent:
             {"role": "system", "content": f"User Data: {entity}"},
         ]
 
+        portfolio = entity.get("recommended_portfolio", {})
+        sim = entity.get("simulation_results", {})
+
+        messages.append({"role": "system", "content": f"Portfolio: {portfolio}"})
+        messages.append({"role": "system", "content": f"Simulation: {sim}"})
+
+
         return chat_completion_text(messages, temperature=0.3)
 
 

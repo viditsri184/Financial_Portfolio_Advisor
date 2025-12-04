@@ -12,8 +12,9 @@ from .routers import (
     nav,
     currency,
     report,
-    portfolio,      # NEW
-    simulation       # NEW
+    portfolio,   
+    simulation,      
+    debug
 )
 
 
@@ -44,6 +45,11 @@ app.include_router(rag.router)
 app.include_router(nav.router)
 app.include_router(currency.router)
 app.include_router(report.router)
+app.include_router(portfolio.router)
+app.include_router(simulation.router)
+app.include_router(debug.router)
+
+
 
 # -----------------------------
 # HEALTH CHECK

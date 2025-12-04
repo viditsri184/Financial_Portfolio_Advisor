@@ -15,7 +15,11 @@ class RAGAgent:
         """
         Returns top-k relevant text chunks from the vector store.
         """
-        return retrieve_top_k(query, top_k)
+        chunks = retrieve_top_k(query, top_k)
+        return [
+            {"text": c["text"], "source": c["source"]}
+            for c in chunks
+        ]
 
 
 rag_agent = RAGAgent()

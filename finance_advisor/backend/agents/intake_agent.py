@@ -26,6 +26,25 @@ class IntakeAgent:
         """
         entity = memory_store.get_entity(session_id)
 
+        missing = []
+
+        if "age" not in entity:
+            missing.append("age")
+
+        if "tenure_years" not in entity:
+            missing.append("investment horizon (tenure in years)")
+
+        if "risk_category" not in entity:
+            missing.append("risk profile")
+
+        # At least one investment amount must be set
+        if "monthly_investment" not in entity and "lumpsum_investment" not in entity:
+            missing.append("investment amount (SIP or lumpsum)")
+
+        if missing:
+            missing_str = ", ".join(missing)
+            return f"Before I can proceed, I need the following information: {missing_str}. Please provide them."
+
         summary = f"Known user info: {entity}"
 
         messages = [
