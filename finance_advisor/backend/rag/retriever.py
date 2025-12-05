@@ -12,7 +12,7 @@ def retrieve_top_k(query: str, top_k: int) -> List[Dict[str, Any]]:
     """
     try:
         results = vector_store.search(query, top_k)
-
+        print(f"[RAG] Retrieved {len(results)} results for query: {query}") #Remove it before LIVE deployment
         # Each result is already a dict with text + source
         return results
 

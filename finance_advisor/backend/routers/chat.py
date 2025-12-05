@@ -13,6 +13,9 @@ from ..agents.simulation_agent import simulation_agent
 from ..agents.rag_agent import rag_agent
 from ..agents.intake_agent import intake_agent
 from ..agents.advisory_agent import advisory_agent
+#from backend.mcp.server import get_mcp_schema, call_mcp_tool
+#from openai.types.chat import ChatCompletionMessageToolCall
+
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -37,7 +40,7 @@ def chat_endpoint(payload: ChatRequest):
         # -------------------------------
         system_prompt = (
             "You are a qualified Indian financial advisor. "
-            "Provide safe, compliant, SEBI-friendly financial explanations. "
+            "Provide safe, compliant, SEBI-friendly financial explanations by using the get_sebi_rule intent. "
             "Use the memory provided to stay consistent in your recommendations. "
             "Avoid giving guaranteed returns."
         )
@@ -78,7 +81,7 @@ def chat_endpoint(payload: ChatRequest):
         if intent == "build_portfolio":
             # Load entity memory FIRST
             entity = memory_store.get_entity(payload.session_id)
-
+  
             required_fields = ["age", "risk_category", "tenure_years"]
 
             # Check if all required fields exist
