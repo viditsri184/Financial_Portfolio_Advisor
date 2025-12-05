@@ -19,6 +19,7 @@ def simulate_portfolio(payload: PortfolioSimulationRequest):
     """
     try:
         result: PortfolioSimulationResponse = run_monte_carlo_simulation(payload)
+        
         return result
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))

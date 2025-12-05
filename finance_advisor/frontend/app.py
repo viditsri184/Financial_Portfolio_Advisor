@@ -1,6 +1,9 @@
 # frontend/app.py
 
 import streamlit as st
+from utils.api_client import APIClient
+from components.chat_box import chat_interface
+from components.risk_form import risk_profile_form
 
 # MUST be the first Streamlit command:
 st.set_page_config(
@@ -8,7 +11,8 @@ st.set_page_config(
     page_icon="💹",
     layout="wide"
 )
-# Load Custom Styles
+
+# Load styles
 with open("assets/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
@@ -44,9 +48,6 @@ from utils.lottie_loaders import render_lottie
 def load_lottie(path):
     with open(path) as f:
         return json.load(f)
-#st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
-#render_lottie("assets/animations/portfolio_animation.json", height=220, key="portfolio_anim")
-#st.markdown("</div>", unsafe_allow_html=True)
 
 
 
@@ -54,15 +55,39 @@ def load_lottie(path):
 # Initialize Session
 # -------------------------------------------------------------
 session_id = init_session()
+short_id = session_id[:6].upper()
 api = APIClient()
 
-# -------------------------------------------------------------
-# Sidebar Navigation
-# -------------------------------------------------------------
-st.sidebar.title("Menu")
+st.sidebar.write("SESSION DEBUG:", session_id)
+
+st.sidebar.markdown("## Finance Advisor")
+st.sidebar.markdown(
+    "<p style='font-size:12px; color:#6B7280;'>SEBI-aware AI assistant</p>",
+    unsafe_allow_html=True
+)
+
 page = st.sidebar.radio(
-    "Navigate",
-    ["Chat Advisor", "Risk Profiling", "Portfolio", "Simulation", "Download Report"]
+    "Navigation",
+    ["Login/Register","Chat Advisor", "Risk Profiling", "Portfolio", "Simulation", "Download Report"],
+    label_visibility="collapsed"
+)
+
+# ---- Apple-style header + shell ----
+st.markdown(
+    """
+    <div class="app-shell">
+      <div class="app-header fade-in">
+        <div>
+          <div class="app-header-title">AI Financial Advisor</div>
+          <div class="app-header-subtitle">Plan, allocate and simulate – safely and clearly.</div>
+        </div>
+        <div style="font-size:12px; color:#6B7280;">
+          Session: <span style="font-weight:500;">{}</span>
+        </div>
+      </div>
+    </div>
+    """.format(short_id),
+    unsafe_allow_html=True,
 )
 
 # -------------------------------------------------------------
@@ -75,9 +100,6 @@ if page == "Chat Advisor":
 elif page == "Risk Profiling":
     
     from utils.lottie_loaders import render_lottie
-    st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
-    render_lottie("assets/animations/risk_profile.json", height=180, key="risk_anim_header")
-    st.markdown("</div>", unsafe_allow_html=True)
     st.title("🧭 Risk Assessment")
     risk_profile_form(api, session_id)
 
@@ -85,7 +107,10 @@ elif page == "Portfolio":
     from utils.lottie_loaders import render_lottie
     render_lottie("assets/animations/portfolio_animation.json", height=220, key="portfolio_anim")
 
-    st.title("📊 Recommended Portfolio")
+    st.markdown('<div class="apple-card fade-in">', unsafe_allow_html=True)
+
+    st.markdown("<h2 class='apple-section-heading'>Recommended Portfolio</h2>", unsafe_allow_html=True)
+    st.markdown("<p class='apple-section-subtitle'>Optimized asset allocation based on your risk profile.</p>", unsafe_allow_html=True)
 
     result = api.fetch_portfolio(session_id)
     if result:
@@ -93,21 +118,25 @@ elif page == "Portfolio":
         explanation = result["explanation"]
 
         show_portfolio_chart(allocation)
-        st.subheader("Explanation")
-        st.write(explanation)
-    else:
-        st.warning("Complete your Risk Profiling first.")
+        st.markdown(f"<p style='font-size:14px;'>{explanation}</p>", unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "Simulation":
     from utils.lottie_loaders import render_lottie
+
     render_lottie("assets/animations/simulation_graph.json", height=220, key="simulation_anim")
 
-    st.title("📈 Monte Carlo Simulation")
+    st.markdown('<div class="apple-card fade-in">', unsafe_allow_html=True)
+
+    st.markdown("<h2 class='apple-section-heading'>Monte Carlo Simulation</h2>", unsafe_allow_html=True)
+    st.markdown("<p class='apple-section-subtitle'>Projected outcomes based on randomized return paths.</p>", unsafe_allow_html=True)
+
     output = api.run_simulation(session_id)
     if output:
         show_simulation_results(output)
-    else:
-        st.warning("Please complete Portfolio first.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "Download Report":
     st.title("📄 Download Your Financial Plan")
@@ -122,3 +151,13 @@ elif page == "Download Report":
         )
     else:
         st.warning("Generate your portfolio & simulation first.")
+
+elif page == "Login":
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        result = api.login(email, password)
+        if result:
+            st.session_state["user_id"] = result["user_id"]
+            st.success("Logged in successfully")

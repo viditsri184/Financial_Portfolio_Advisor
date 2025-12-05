@@ -13,18 +13,14 @@ router = APIRouter(prefix="/risk_profile", tags=["risk_profile"])
 def calculate_risk_profile(payload: RiskProfileRequest):
     """
     Processes user questionnaire + demographics to produce a risk category.
-    Also updates memory store with risk-related entity memory.
+    Saves results into Redis session memory for later use.
     """
     try:
-        # ------------------------------
-        # Compute risk category and score
-        # ------------------------------
+        # Compute risk profile
         result: RiskProfileResponse = compute_risk_score(payload)
 
-        # ----------------------------------
-        # Persist risk profile in entity memory
-        # ----------------------------------
-        memory_store.update_entity(
+        # Save entity memory into Redis
+        memory_store.save_entity(
             payload.session_id,
             {
                 "age": payload.age,

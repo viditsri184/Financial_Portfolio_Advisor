@@ -14,6 +14,11 @@ from backend.mcp.server import get_mcp_schema, call_mcp_tool
 from backend.guardrails.input_guard import check_user_input
 from backend.guardrails.output_guard import sanitize_output, append_disclaimer
 
+from backend.db.conversation_store import save_message
+from backend.db.user_store import ensure_user
+
+
+
 
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -32,12 +37,17 @@ def chat_endpoint(payload: ChatRequest):
     try:
         session_id = payload.session_id
 
+        ensure_user(session_id)
+
         # -----------------------------
         # 0. Input guardrails
         # -----------------------------
         allowed, guard_msg = check_user_input(payload.message)
         if not allowed:
             return ChatResponse(reply=guard_msg)
+        
+        # Save the user message into SQLite
+        save_message(session_id, "user", payload.message)
 
         # -----------------------------
         # Load memory
@@ -112,6 +122,25 @@ def chat_endpoint(payload: ChatRequest):
                     "tool_call_id": tool_call.id,
                     "content": json.dumps(tool_result)
                 })
+            
+            if tool_call.function.name == "portfolio_tool":
+                memory_store.save_entity(
+                    session_id,
+                    {"last_portfolio": tool_result}
+                )
+
+            if tool_call.function.name == "simulate_tool":
+                memory_store.save_entity(
+                    session_id,
+                    {"last_simulation": tool_result}
+                )
+
+            if tool_call.function.name == "risk_profile_tool":
+                memory_store.save_entity(
+                    session_id,
+                    {"risk_category": tool_result.get("risk_category")}
+                )
+
 
             print("\n======= GPT REQUESTED TOOL CALL(S) =======")
             for tc in msg.tool_calls:
@@ -139,6 +168,9 @@ def chat_endpoint(payload: ChatRequest):
         # --------------------------------------
         cleaned_text, _ = sanitize_output(raw_reply)
         final_reply = append_disclaimer(cleaned_text)
+
+        # Save assistant reply
+        save_message(session_id, "assistant", final_reply)
 
         return ChatResponse(reply=final_reply)
 

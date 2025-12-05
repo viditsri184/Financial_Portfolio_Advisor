@@ -14,7 +14,9 @@ from .routers import (
     report,
     portfolio,   
     simulation,      
-    debug
+    debug,
+    conversation, 
+    auth
 )
 
 
@@ -48,6 +50,8 @@ app.include_router(report.router)
 app.include_router(portfolio.router)
 app.include_router(simulation.router)
 app.include_router(debug.router)
+app.include_router(conversation.router)
+app.include_router(auth.router)
 
 
 

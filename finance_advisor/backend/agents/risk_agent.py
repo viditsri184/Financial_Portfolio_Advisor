@@ -15,7 +15,7 @@ class RiskAgent:
         result = compute_risk_score(payload)
 
         # Save memory
-        memory_store.update_entity(
+        memory_store.save_entity(
             payload.session_id,
             {
                 "risk_category": result.risk_category,

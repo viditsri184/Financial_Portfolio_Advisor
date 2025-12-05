@@ -1,65 +1,17 @@
-# backend/memory/store.py
-
-from typing import Dict, Any
-from threading import Lock
-
+from backend.db.redis_client import save_session_memory, get_session_memory
 
 class MemoryStore:
-    """
-    Thread-safe in-memory store.
-    Use this for development.
-    Replace with Redis or DB in production.
-    """
 
-    def __init__(self):
-        # session_id -> { "entity": {...}, "summary": "..." }
-        self._store: Dict[str, Dict[str, Any]] = {}
-        self._lock = Lock()
+    def save_entity(self, session_id, data):
+        save_session_memory(session_id, "entity", data)
 
-    # ------------------------------------------
-    # Session Access
-    # ------------------------------------------
-    def get_session(self, session_id: str) -> Dict[str, Any]:
-        with self._lock:
-            return self._store.setdefault(session_id, {"entity": {}, "summary": ""})
+    def get_entity(self, session_id):
+        return get_session_memory(session_id, "entity") or {}
 
-    # ------------------------------------------
-    # Update Entity Memory
-    # ------------------------------------------
-    def update_entity(self, session_id: str, updates: Dict[str, Any]):
-        """
-        Updates entity memory with dictionary of new values.
-        """
-        with self._lock:
-            session = self._store.setdefault(session_id, {"entity": {}, "summary": ""})
-            session["entity"].update(updates)
+    def save_summary(self, session_id, data):
+        save_session_memory(session_id, "summary", data)
 
-    # ------------------------------------------
-    # Update Summary Memory
-    # ------------------------------------------
-    def update_summary(self, session_id: str, new_summary: str):
-        """
-        Replaces summary memory with new summary.
-        Typically produced by GPT summarizer.
-        """
-        with self._lock:
-            session = self._store.setdefault(session_id, {"entity": {}, "summary": ""})
-            session["summary"] = new_summary
+    def get_summary(self, session_id):
+        return get_session_memory(session_id, "summary")
 
-    # ------------------------------------------
-    # Fetch Entity Only
-    # ------------------------------------------
-    def get_entity(self, session_id: str) -> Dict[str, Any]:
-        with self._lock:
-            return self._store.setdefault(session_id, {"entity": {}, "summary": ""})["entity"]
-
-    # ------------------------------------------
-    # Fetch Summary Only
-    # ------------------------------------------
-    def get_summary(self, session_id: str) -> str:
-        with self._lock:
-            return self._store.setdefault(session_id, {"entity": {}, "summary": ""})["summary"]
-
-
-# Export global singleton
 memory_store = MemoryStore()

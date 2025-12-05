@@ -21,7 +21,8 @@ class PortfolioAgent:
         explanation = explain_portfolio(allocation, risk)
 
         # Save allocation in memory
-        memory_store.update_entity(session_id, {"recommended_portfolio": allocation})
+        memory_store.save_entity(session_id, {"recommended_portfolio": allocation})
+
 
         return {
             "allocation": allocation,

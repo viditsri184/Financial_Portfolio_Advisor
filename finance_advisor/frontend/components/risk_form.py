@@ -1,91 +1,66 @@
 # frontend/components/risk_form.py
 
 import streamlit as st
-
-
+from utils.lottie_loaders import render_lottie
 
 def risk_profile_form(api, session_id: str):
-    """
-    UI for user risk profiling.
-    Uses backend /risk_profile endpoint.
-    """
 
-    st.write("Please fill in the details below to determine your risk profile.")
+    st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
+    render_lottie("assets/animations/risk_profile.json", height=200, key="risk_anim")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="apple-card">
+            <div class="apple-section-heading">Risk Profiling</div>
+            <div class="apple-section-subtitle">
+                Help the advisor understand your capacity and willingness to take risk. 
+                This drives asset allocation and simulation recommendations.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     with st.form("risk_profile_form"):
+        col1, col2 = st.columns(2)
 
-        # -----------------------------
-        # Basic User Information
-        # -----------------------------
-        age = st.number_input("Age", min_value=18, max_value=90, value=30)
+        with col1:
+            age = st.number_input("Your Age", min_value=18, max_value=85, value=30)
+            liquidity_needs = st.selectbox("Liquidity Needs", ["Low", "Medium", "High"])
 
-        income_stability = st.selectbox(
-            "Income Stability",
-            ["high", "medium", "low"],
-            index=0
-        )
+        with col2:
+            income_stability = st.selectbox("Income Stability", ["Low", "Medium", "High"])
+            investment_knowledge = st.selectbox("Investment Knowledge", ["Low", "Medium", "High"])
 
-        liquidity_needs = st.selectbox(
-            "Liquidity Needs (How often do you need easy access to cash?)",
-            ["low", "medium", "high"],
-            index=1
-        )
+        st.markdown("#### Risk Tolerance")
+        q1 = st.slider("Comfort with short-term losses", 1, 5, 3)
+        q2 = st.slider("Investment horizon (longer = more risk)", 1, 5, 3)
+        q3 = st.slider("Familiarity with equity markets", 1, 5, 3)
+        q4 = st.slider("How you respond to financial uncertainty", 1, 5, 3)
 
-        investment_knowledge = st.selectbox(
-            "Investment Knowledge",
-            ["high", "medium", "low"],
-            index=1
-        )
+        submitted = st.form_submit_button("Calculate My Risk Profile")
 
-        st.markdown("### Questionnaire")
-
-        # -----------------------------
-        # Risk MCQ Questions (1-5 score)
-        # -----------------------------
-        q1 = st.slider(
-            "Q1: How comfortable are you with short-term losses?",
-            1, 5, 3
-        )
-        q2 = st.slider(
-            "Q2: How long can you stay invested without needing the money?",
-            1, 5, 3
-        )
-        q3 = st.slider(
-            "Q3: How familiar are you with equity markets?",
-            1, 5, 3
-        )
-        q4 = st.slider(
-            "Q4: How much volatility can you tolerate?",
-            1, 5, 3
-        )
-
-        submitted = st.form_submit_button("Calculate Risk Profile")
-
-    # -----------------------------------------------------------------
-    # On Submit → Call Backend
-    # -----------------------------------------------------------------
     if submitted:
-        with st.spinner("Evaluating your risk profile..."):
-
+        with st.spinner("Analyzing your risk profile..."):
             payload = {
                 "session_id": session_id,
                 "age": age,
                 "income_stability": income_stability,
                 "liquidity_needs": liquidity_needs,
                 "investment_knowledge": investment_knowledge,
-                "answers": {
-                    "q1": q1,
-                    "q2": q2,
-                    "q3": q3,
-                    "q4": q4
-                }
+                "answers": {"q1": q1, "q2": q2, "q3": q3, "q4": q4},
             }
-
             result = api.send_risk_profile(payload)
 
-        if result:
-            st.success(f"Your Risk Category: **{result['risk_category'].title()}**")
-            st.write(result["explanation"])
+        st.markdown(
+            """
+            <div class="apple-card fade-in">
+            """,
+            unsafe_allow_html=True,
+        )
 
-            # Save in session state
-            st.session_state["risk_profile"] = result
+        st.success(f"Your Risk Category: {result['risk_category'].title()}")
+        st.markdown(f"<p style='font-size:14px; color:#374151;'>{result['explanation']}</p>", unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)

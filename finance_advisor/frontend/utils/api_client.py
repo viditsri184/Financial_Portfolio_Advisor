@@ -18,17 +18,20 @@ class APIClient:
     # ------------------------------------------------------------
     # Helper method for making HTTP requests
     # ------------------------------------------------------------
-    def _post(self, endpoint: str, payload: Dict[str, Any]) -> Optional[Dict]:
-        url = f"{self.base_url}{endpoint}"
-
+    def _post(self, path, payload):
         try:
+            url = f"{self.base_url}{path}"
             resp = requests.post(url, json=payload)
-            resp.raise_for_status()
+            
+            if resp.status_code != 200:
+                st.error(f"API Error {resp.status_code}: {resp.text}")
+                return None
+            
             return resp.json()
-
         except Exception as ex:
-            st.error(f"API Error: {ex}")
+            st.error(f"API Exception: {ex}")
             return None
+
 
     def _get(self, endpoint: str) -> Optional[Any]:
         url = f"{self.base_url}{endpoint}"
@@ -88,3 +91,21 @@ class APIClient:
     # ------------------------------------------------------------
     def download_report(self, session_id: str) -> Optional[bytes]:
         return self._get(f"/download_plan?session_id={session_id}")
+    
+
+    
+    # ------------------------------------------------------------
+    # Conversation endpoint
+    # ------------------------------------------------------------
+    def get_conversation(self, session_id: str):
+        return self._get(f"/conversation/{session_id}")
+    
+
+    # ------------------------------------------------------------
+    # Auth endpoint
+    # ------------------------------------------------------------
+    def login(self, email, password):
+        return self._post("/auth/login", {"email": email, "password": password})
+
+    def register(self, email, password):
+        return self._post("/auth/register", {"email": email, "password": password})
