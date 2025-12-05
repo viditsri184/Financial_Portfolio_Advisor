@@ -71,6 +71,25 @@ def load_text_from_file(filepath: str) -> str:
             return ""
 
     print(f"[Warning] Unsupported file type: {filepath}")
+
+    if ext == "csv":
+        try:
+            import csv
+            rows = []
+            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    # join cells with a comma and space for readability
+                    rows.append(", ".join(cell for cell in row))
+                # Informational print: how many rows were read from this CSV
+            print(f"[RAG][CSV] Read {len(rows)} rows from: {filepath}")
+                # Return as newline-separated text (header + rows)
+            return "\n".join(rows)
+        except Exception:
+            print(f"[Warning] Could not read CSV: {filepath}")
+            return ""
+
+    print(f"[Warning] Unsupported file type: {filepath}")
     return ""
 
 

@@ -40,7 +40,7 @@ def convert_currency_amount(
 
         data = resp.json()
 
-        rate = float(data["info"]["rate"])
+        rate = float(data["info"]["quote"])
         converted = float(data["result"])
 
         result = {
