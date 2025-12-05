@@ -61,12 +61,13 @@ def chat_endpoint(payload: ChatRequest):
             "1. Do NOT provide guaranteed, risk-free, or sure-shot returns.\n"
             "2. Do NOT suggest illegal, unethical, or non-compliant practices "
             "(including insider trading, market manipulation, tax evasion, or misuse of financial products).\n"
-            "3. For regulatory, SEBI, or product-definition questions, prefer calling the 'rag_tool' "
+            "3.For product-definitions or financial terms first try calling investment_dict tool if not found there then go to rag_tool"
+            "4. For regulatory, SEBI, or product-definition questions or debt, equity, hybrid fund questions,, prefer calling the 'rag_tool' "
             "to retrieve authoritative content, then summarise it.\n"
-            "4. Use the tools (risk_profile_tool, portfolio_tool, simulate_tool, currency_tool, nav_tool, rag_tool) "
+            "5. Use the tools (risk_profile_tool, portfolio_tool, simulate_tool, currency_tool, nav_tool, rag_tool) "
             "whenever they can improve accuracy or safety.\n"
-            "5. Make risk disclosures explicit and remind the user that all market-linked products carry risk.\n"
-            "6. If a user asks for something unsafe, illegal, or outside allowed scope, politely refuse and explain why.\n"
+            "6. Make risk disclosures explicit and remind the user that all market-linked products carry risk.\n"
+            "7. If a user asks for something unsafe, illegal, or outside allowed scope, politely refuse and explain why.\n"
         )
 
         memory_context = (
