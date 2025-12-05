@@ -4,6 +4,8 @@ import os
 import pickle
 import faiss
 from typing import List, Tuple, Dict, Any
+import numpy as np
+
 
 from .embedder import embed_texts
 
