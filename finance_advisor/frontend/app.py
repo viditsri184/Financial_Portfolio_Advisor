@@ -8,11 +8,26 @@ st.set_page_config(
     page_icon="💹",
     layout="wide"
 )
+# Load Custom Styles
+with open("assets/styles.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Load CSS AFTER set_page_config but BEFORE any UI layout
 try:
     with open("assets/styles.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    
+    st.markdown("""
+        <style>
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .main {
+            animation: fadeInPage 0.6s ease-out;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 except:
     pass
 
@@ -22,6 +37,17 @@ from components.chat_box import chat_interface
 from components.risk_form import risk_profile_form
 from components.portfolio_charts import show_portfolio_chart
 from components.simulation_charts import show_simulation_results
+from streamlit_lottie import st_lottie
+import json
+from utils.lottie_loaders import render_lottie
+
+def load_lottie(path):
+    with open(path) as f:
+        return json.load(f)
+#st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
+#render_lottie("assets/animations/portfolio_animation.json", height=220, key="portfolio_anim")
+#st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 # -------------------------------------------------------------
@@ -47,10 +73,18 @@ if page == "Chat Advisor":
     chat_interface(api, session_id)
 
 elif page == "Risk Profiling":
+    
+    from utils.lottie_loaders import render_lottie
+    st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
+    render_lottie("assets/animations/risk_profile.json", height=180, key="risk_anim_header")
+    st.markdown("</div>", unsafe_allow_html=True)
     st.title("🧭 Risk Assessment")
     risk_profile_form(api, session_id)
 
 elif page == "Portfolio":
+    from utils.lottie_loaders import render_lottie
+    render_lottie("assets/animations/portfolio_animation.json", height=220, key="portfolio_anim")
+
     st.title("📊 Recommended Portfolio")
 
     result = api.fetch_portfolio(session_id)
@@ -65,6 +99,9 @@ elif page == "Portfolio":
         st.warning("Complete your Risk Profiling first.")
 
 elif page == "Simulation":
+    from utils.lottie_loaders import render_lottie
+    render_lottie("assets/animations/simulation_graph.json", height=220, key="simulation_anim")
+
     st.title("📈 Monte Carlo Simulation")
     output = api.run_simulation(session_id)
     if output:

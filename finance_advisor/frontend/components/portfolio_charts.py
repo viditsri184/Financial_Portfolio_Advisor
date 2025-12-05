@@ -4,6 +4,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+from utils.lottie_loaders import render_lottie
+
+st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
+render_lottie("assets/animations/portfolio_animation.json", height=220, key="portfolio_anim")
+st.markdown("</div>", unsafe_allow_html=True)
 
 def show_portfolio_chart(allocation: dict):
     """

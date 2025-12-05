@@ -2,6 +2,10 @@
 
 import streamlit as st
 from typing import List, Dict
+from utils.lottie_loaders import render_lottie
+st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
+render_lottie("assets/animations/advisor_bot.json", height=180, key="chatbot_anim_header")
+st.markdown("</div>", unsafe_allow_html=True)
 
 
 def chat_interface(api, session_id: str):
@@ -20,6 +24,11 @@ def chat_interface(api, session_id: str):
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []   # List of dicts: {"role": "user/assistant", "content": "..."}
 
+    from utils.lottie_loaders import render_lottie
+
+    # Place hero animation above chat UI once per page
+    render_lottie("assets/animations/advisor_bot.json", height=180, key="chatbot_anim_header")
+
     st.subheader("Your Conversation")
 
     # -------------------------------------------------------------
@@ -27,11 +36,10 @@ def chat_interface(api, session_id: str):
     # -------------------------------------------------------------
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
-            with st.chat_message("user"):
-                st.write(msg["content"])
+            st.markdown(f"<div class='user-bubble'>{msg['content']}</div>", unsafe_allow_html=True)
         else:
-            with st.chat_message("assistant"):
-                st.write(msg["content"])
+            st.markdown(f"<div class='assistant-bubble'>{msg['content']}</div>", unsafe_allow_html=True)
+
 
     # -------------------------------------------------------------
     # User Input Box

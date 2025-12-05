@@ -2,6 +2,12 @@
 
 import streamlit as st
 import plotly.graph_objects as go
+from utils.lottie_loaders import render_lottie
+
+st.markdown("<div class='fade-in'>", unsafe_allow_html=True)
+render_lottie("assets/animations/simulation_graph.json", height=220, key="simulation_anim")
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 def show_simulation_results(results: dict):

@@ -3,6 +3,7 @@
 import streamlit as st
 
 
+
 def risk_profile_form(api, session_id: str):
     """
     UI for user risk profiling.

@@ -1,35 +1,87 @@
-/* Basic styling for the Financial Advisor Streamlit UI */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-body {
+html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-h1, h2, h3 {
-    font-weight: 600;
+/* Smooth fade-in animation for all UI blocks */
+
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
 }
 
-.stButton>button {
-    background-color: #0d6efd;
+.stApp {
+    animation: fadeIn 0.8s ease-in-out;
+    background: linear-gradient(180deg, #F7F9FC 0%, #FFFFFF 100%);
+}
+
+/* Card-style blocks */
+.block-card {
+    background-color: #FFFFFF;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease;
+}
+
+/* Chat bubbles */
+.user-bubble {
+    background: #0A84FF;
     color: white;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    border: none;
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin: 10px 0;
+    max-width: 80%;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.assistant-bubble {
+    background: #E8EAF0;
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin: 10px 0;
+    max-width: 80%;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Buttons */
+.stButton>button {
+    background-color: #0A84FF;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: 0.3s;
 }
 
 .stButton>button:hover {
-    background-color: #0b5ed7;
+    background-color: #0066CC;
+    transform: translateY(-2px);
 }
 
-.chat-message {
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 12px;
+.fade-in {
+    animation: fadeIn 0.8s ease-in-out;
 }
 
-.chat-user {
-    background-color: #e3f2fd;
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(12px);}
+    to {opacity: 1; transform: translateY(0);}
 }
 
-.chat-assistant {
-    background-color: #f8f9fa;
+
+/* Sidebar modern UI */
+section[data-testid="stSidebar"] {
+    background-color: #ffffff !important;
+    padding-top: 30px;
+    border-right: 1px solid #E5E7EB;
+}
+
+section[data-testid="stSidebar"] .css-1d391kg {
+    background-color: transparent !important;
+}
+
+section[data-testid="stSidebar"] {
+    box-shadow: 2px 0px 8px rgba(0,0,0,0.05);
 }
