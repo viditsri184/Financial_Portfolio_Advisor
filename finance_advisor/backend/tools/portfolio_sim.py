@@ -118,5 +118,6 @@ def run_monte_carlo_simulation(
         expected_value=expected_value,
         worst_case=worst_case,
         best_case=best_case,
-        probability_of_goal_achievement=probability_of_goal
+        probability_of_goal_achievement=probability_of_goal,
+        final_values=final_values
     )

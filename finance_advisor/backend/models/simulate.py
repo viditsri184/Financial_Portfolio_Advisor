@@ -55,3 +55,4 @@ class PortfolioSimulationResponse(BaseModel):
     best_case: float
     worst_case: float
     probability_of_goal_achievement: float
+    final_values: list[float]  

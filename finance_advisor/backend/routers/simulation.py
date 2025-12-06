@@ -11,23 +11,17 @@ import traceback
 
 @router.get("")
 def simulate_portfolio(session_id: str = Query(..., description="User session ID")):
-    """
-    Runs Monte Carlo simulation using SimulationAgent.
-    """
     try:
         result = simulation_agent.run_simulation(session_id)
 
-        # Save into Redis memory
-        memory_store.save_entity(
-            session_id,
-            {"last_simulation": result}
-        )
+        memory_store.save_entity(session_id, {"last_simulation": result})
 
         return {
             "expected_value": result["expected_value"],
             "best_case": result["best_case"],
             "worst_case": result["worst_case"],
             "probability_of_goal_achievement": result["probability_of_goal_achievement"],
+            "final_values": result["final_values"]
         }
 
     except Exception as ex:

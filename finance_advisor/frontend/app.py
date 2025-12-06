@@ -4,6 +4,7 @@ import streamlit as st
 from utils.api_client import APIClient
 from components.chat_box import chat_interface
 from components.risk_form import risk_profile_form
+from components.simulation_charts import show_simulation_results
 
 # MUST be the first Streamlit command:
 st.set_page_config(
@@ -150,16 +151,47 @@ elif page == "Simulation":
 
     render_lottie("assets/animations/simulation_graph.json", height=220, key="simulation_anim")
 
-    st.markdown('<div class="apple-card fade-in">', unsafe_allow_html=True)
+    st.markdown("<h2 style='font-weight:600;'>📈 Portfolio Simulation</h2>", unsafe_allow_html=True)
 
-    st.markdown("<h2 class='apple-section-heading'>Monte Carlo Simulation</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='apple-section-subtitle'>Projected outcomes based on randomized return paths.</p>", unsafe_allow_html=True)
+    # Input form for investment details
 
-    output = api.run_simulation(session_id)
-    if output:
-        show_simulation_results(output)
+    # Form section
+    with st.form("simulation_inputs"):
+        st.subheader("Enter Investment Details")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            sip_amount = st.number_input("Monthly SIP Amount (₹)", min_value=0, value=10000)
+            tenure_years = st.number_input("Investment Duration (Years)", min_value=1, value=10)
+        with col2:
+            lumpsum_amount = st.number_input("Lumpsum Amount", min_value=0, value=0)
+            goal_amount = st.number_input("Goal Amount (₹)", min_value=0, value=10000000)
+
+        num_simulations = st.slider("Number of Simulations", 1000, 10000, 5000)
+
+        submitted = st.form_submit_button("Save & Run Simulation")
+
+    # If user clicked the submit button → save memory AND then simulate
+    if submitted:
+        api.save_memory(session_id, {
+            "monthly_investment": sip_amount,
+            "tenure_years": tenure_years,
+            "lumpsum_investment": lumpsum_amount,
+            "goal_amount": goal_amount,
+            "num_simulations": num_simulations
+        })
+
+        st.success("Saved! Now running simulation...")
+
+        # Call simulation API here
+        result = api.run_simulation(session_id)
+
+        st.subheader("Simulation Results")
+        if result is None:
+            st.error("Simulation failed. Please generate portfolio and try again.")
+        else:
+            show_simulation_results(result)
+
 
 elif page == "Download Report":
     if "user_id" not in st.session_state:

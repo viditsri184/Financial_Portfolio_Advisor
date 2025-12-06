@@ -109,3 +109,6 @@ class APIClient:
 
     def register(self, email, password):
         return self._post("/auth/register", {"email": email, "password": password})
+    
+    def save_memory(self, session_id: str, data: dict):
+        return self._post("/memory/save", {"session_id": session_id, "data": data})

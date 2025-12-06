@@ -16,7 +16,8 @@ from .routers import (
     simulation,      
     debug,
     conversation, 
-    auth
+    auth, 
+    memory
 )
 
 
@@ -52,6 +53,7 @@ app.include_router(simulation.router)
 app.include_router(debug.router)
 app.include_router(conversation.router)
 app.include_router(auth.router)
+app.include_router(memory.router)
 
 
 
