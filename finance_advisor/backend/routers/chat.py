@@ -16,6 +16,7 @@ from backend.guardrails.output_guard import sanitize_output, append_disclaimer
 
 from backend.db.conversation_store import save_message
 from backend.db.user_store import ensure_user
+from backend.memory.semantic_cache import search_cache, save_cache
 
 
 
@@ -45,6 +46,11 @@ def chat_endpoint(payload: ChatRequest):
         allowed, guard_msg = check_user_input(payload.message)
         if not allowed:
             return ChatResponse(reply=guard_msg)
+        
+        # Check semantic cache
+        cached = search_cache(payload.message)
+        if cached:
+            return ChatResponse(reply=cached)
         
         # Save the user message into SQLite
         save_message(session_id, "user", payload.message)
@@ -78,6 +84,7 @@ def chat_endpoint(payload: ChatRequest):
             "whenever they can improve accuracy or safety.\n"
             "6. Make risk disclosures explicit and remind the user that all market-linked products carry risk.\n"
             "7. If a user asks for something unsafe, illegal, or outside allowed scope, politely refuse and explain why.\n"
+            "If the user has not provided SIP amount, duration or investment details,  you MUST call the function `set_investment_preferences` to store those values before calling `simulate_tool`."
         )
 
         memory_context = (
@@ -93,6 +100,8 @@ def chat_endpoint(payload: ChatRequest):
             {"role": "system", "content": memory_context},
             {"role": "user", "content": payload.message},
         ]
+
+        
 
         # -----------------------------
         # Step 1: Ask Azure GPT with tools
@@ -172,6 +181,7 @@ def chat_endpoint(payload: ChatRequest):
         # Save assistant reply
         save_message(session_id, "assistant", final_reply)
         memory_store.save_summary(session_id, final_reply)
+        save_cache(payload.message, final_reply)
 
 
         return ChatResponse(reply=final_reply)

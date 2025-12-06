@@ -17,7 +17,7 @@ def show_simulation_results(result):
     col2.metric("Best Case (95%)", f"₹{best:,.0f}")
     col3.metric("Worst Case (5%)", f"₹{worst:,.0f}")
 
-    st.markdown(f"### 🎯 Goal Achievement Probability: **{prob * 100:.2f}%**")
+    #st.markdown(f"### 🎯 Goal Achievement Probability: **{prob * 100:.2f}%**")
 
     # Chart
     fig = go.Figure()

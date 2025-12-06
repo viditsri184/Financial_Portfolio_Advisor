@@ -23,6 +23,8 @@ from backend.models.simulate import (
     InvestmentDetails,
     SimulationParams,
 )
+from backend.tools.set_investment import set_investment_preferences
+
 
 # -------------------------------------------------------------------
 # Internal tool registry
@@ -247,3 +249,36 @@ def call_mcp_tool(tool_call: Any) -> Any:
 
     except Exception as ex:
         return {"error": str(ex)}
+    
+
+# -------------------------------------------------------------------
+# Public helpers used by /chat
+# -------------------------------------------------------------------
+@register_tool(
+    name="set_investment_preferences",
+    description="Save user SIP, duration, lumpsum, and goal details for simulation.",
+    parameters_schema={
+        "type": "object",
+        "properties": {
+            "session_id": {"type": "string"},
+            "monthly": {"type": "number", "description": "Monthly SIP amount"},
+            "duration": {"type": "number", "description": "Investment duration in years"},
+            "lumpsum": {"type": "number", "description": "Optional lumpsum investment", "default": 0},
+            "goal": {"type": "number", "description": "User's goal amount", "default": 10000000}
+        },
+        "required": ["session_id", "monthly", "duration"]
+    }
+)
+def set_investment_preferences_tool(session_id: str,
+                                    monthly: float,
+                                    duration: int,
+                                    lumpsum: float = 0,
+                                    goal: float = 10000000):
+    return set_investment_preferences(
+        session_id=session_id,
+        monthly=monthly,
+        duration=duration,
+        lumpsum=lumpsum,
+        goal=goal
+    )
+
