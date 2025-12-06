@@ -12,6 +12,12 @@ st.set_page_config(
     layout="wide"
 )
 
+# Handle page redirection BEFORE rendering radio menu
+if "pending_redirect" in st.session_state:
+    redirect_target = st.session_state.pop("pending_redirect")
+    st.session_state["nav_main"] = redirect_target
+    st.experimental_rerun()
+
 # Load styles
 with open("assets/styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -55,10 +61,19 @@ def load_lottie(path):
 # Initialize Session
 # -------------------------------------------------------------
 session_id = init_session()
-short_id = session_id[:6].upper()
 api = APIClient()
+if "user_id" in st.session_state:
+    # Create session_id only once per login
+    if "session_id" not in st.session_state:
+        import uuid
+        new_session = str(uuid.uuid4())
+        st.session_state["session_id"] = f"{st.session_state['user_id']}-{new_session}"
 
-st.sidebar.write("SESSION DEBUG:", session_id)
+session_id = st.session_state.get("session_id")
+short_id = session_id[:6].upper()
+
+user_email = st.session_state.get("user_email", "Guest")
+
 
 st.sidebar.markdown("## Finance Advisor")
 st.sidebar.markdown(
@@ -69,41 +84,46 @@ st.sidebar.markdown(
 page = st.sidebar.radio(
     "Navigation",
     ["Login/Register","Chat Advisor", "Risk Profiling", "Portfolio", "Simulation", "Download Report"],
-    label_visibility="collapsed"
+    label_visibility="collapsed", key="nav_main"
 )
 
 # ---- Apple-style header + shell ----
 st.markdown(
-    """
-    <div class="app-shell">
-      <div class="app-header fade-in">
+    f"""
+    <div class="app-header">
         <div>
-          <div class="app-header-title">AI Financial Advisor</div>
-          <div class="app-header-subtitle">Plan, allocate and simulate – safely and clearly.</div>
+            <div class="app-header-title">AI Financial Advisor</div>
+            <div class="app-header-subtitle">Welcome, {user_email}</div>
         </div>
-        <div style="font-size:12px; color:#6B7280;">
-          Session: <span style="font-weight:500;">{}</span>
-        </div>
-      </div>
     </div>
-    """.format(short_id),
-    unsafe_allow_html=True,
+    """,
+    unsafe_allow_html=True
 )
+
+
 
 # -------------------------------------------------------------
 # PAGE LOGIC
 # -------------------------------------------------------------
 if page == "Chat Advisor":
     st.title("💬 AI Financial Advisor")
+    if "user_id" not in st.session_state:
+        st.warning("Please login to continue.")
+        st.stop()
     chat_interface(api, session_id)
 
 elif page == "Risk Profiling":
-    
+    if "user_id" not in st.session_state:
+        st.warning("Please login to continue.")
+        st.stop()
     from utils.lottie_loaders import render_lottie
     st.title("🧭 Risk Assessment")
     risk_profile_form(api, session_id)
 
 elif page == "Portfolio":
+    if "user_id" not in st.session_state:
+        st.warning("Please login to continue.")
+        st.stop()
     from utils.lottie_loaders import render_lottie
     render_lottie("assets/animations/portfolio_animation.json", height=220, key="portfolio_anim")
 
@@ -123,6 +143,9 @@ elif page == "Portfolio":
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "Simulation":
+    if "user_id" not in st.session_state:
+        st.warning("Please login to continue.")
+        st.stop()
     from utils.lottie_loaders import render_lottie
 
     render_lottie("assets/animations/simulation_graph.json", height=220, key="simulation_anim")
@@ -139,6 +162,9 @@ elif page == "Simulation":
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif page == "Download Report":
+    if "user_id" not in st.session_state:
+        st.warning("Please login to continue.")
+        st.stop()
     st.title("📄 Download Your Financial Plan")
 
     pdf_bytes = api.download_report(session_id)
@@ -152,12 +178,36 @@ elif page == "Download Report":
     else:
         st.warning("Generate your portfolio & simulation first.")
 
-elif page == "Login":
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
+elif page == "Login/Register":
+    st.markdown("<h2>Login / Register</h2>", unsafe_allow_html=True)
 
-    if st.button("Login"):
-        result = api.login(email, password)
-        if result:
-            st.session_state["user_id"] = result["user_id"]
-            st.success("Logged in successfully")
+    tab1, tab2 = st.tabs(["Login", "Register"])
+
+    with tab1:
+        st.subheader("Login")
+        login_email = st.text_input("Email", key="login_email")
+        login_password = st.text_input("Password", type="password", key="login_pass")
+
+        if st.button("Login"):
+            result = api.login(login_email, login_password)
+            if result:
+                st.session_state["user_id"] = result["user_id"]
+                st.session_state["user_email"] = login_email  
+                st.success("Login successful!")
+                st.session_state["pending_redirect"] = "Chat Advisor"
+                st.experimental_rerun()
+
+
+    with tab2:
+        st.subheader("Register")
+        reg_email = st.text_input("New Email", key="reg_email")
+        reg_password = st.text_input("New Password", type="password", key="reg_pass")
+
+        if st.button("Register"):
+            result = api.register(reg_email, reg_password)
+            if result:
+                st.success("Registration successful!")
+                st.session_state["user_id"] = result.get("user_id", reg_email) 
+                st.session_state["user_email"] = reg_email 
+                st.session_state["pending_redirect"] = "Chat Advisor"
+                st.rerun()
