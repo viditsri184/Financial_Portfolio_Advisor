@@ -171,6 +171,8 @@ def chat_endpoint(payload: ChatRequest):
 
         # Save assistant reply
         save_message(session_id, "assistant", final_reply)
+        memory_store.save_summary(session_id, final_reply)
+
 
         return ChatResponse(reply=final_reply)
 
